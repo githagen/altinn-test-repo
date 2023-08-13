@@ -53,5 +53,5 @@ jobs:
   
           # Update the issue with the new body
           gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }} --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATCH
+          echo "Issue updated successfully!"
         fi
-        
