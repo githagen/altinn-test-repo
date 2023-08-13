@@ -22,7 +22,7 @@ jobs:
         BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q ".body")
 
         # Fetch the GraphQL ID of the issue using curl
-        GRAPHQL_ID=$(curl -s -H "Authorization: bearer $GH_TOKEN" -X POST -d '{
+        GRAPHQL_ID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -X POST -d '{
           "query": "query ($owner: String!, $repo: String!, $number: Int!) {
             repository(owner: $owner, name: $repo) {
               issue(number: $number) {
