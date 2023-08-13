@@ -13,21 +13,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Set up the GitHub CLI tool
-    - name: Set up GitHub CLI
-      run: |
-        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-        sudo apt-add-repository https://cli.github.com/packages
-        sudo apt update
-        sudo apt install gh
-
     # Update the issue with its GraphQL ID
     - name: Update issue with GraphQL ID
       env:
         GH_TOKEN: ${{ secrets.MY_PAT }} # Use the personal access token
       run: |
         # Authenticate with the GitHub CLI using the provided token
-        echo $GH_TOKEN | gh auth login --with-token
+        gh auth login --with-token <<< "$GH_TOKEN"
 
         # Get the body of the newly created issue
         BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q ".body")
@@ -46,4 +38,4 @@ jobs:
         UPDATED_BODY="$BODY\n\n**GraphQL ID**: $GRAPHQL_ID"
 
         # Update the issue with the new body
-        gh issue update ${{ github.event.issue.number }} --body "$UPDATED_
+        gh issue update ${{ github.event.issue.number }} --body "$UPDATED_BODY"
