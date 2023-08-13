@@ -1,5 +1,5 @@
 name: Epic 💎
-description: Create a new epic (very big user story)
+description: Create a new epic (in the product backlog, typically a capability or feature)
 labels: ["Epic", "status/draft"]
 body:          
   - type: textarea
@@ -27,6 +27,9 @@ body:
     attributes:
       label: Additional Information
       description: Links to relevant resources, documentation of other issues, UX sketches, technical architecture/requirements.
+      value: |
+        - **Archi Object ID**: [TO BE FILLED]
+        - **GraphQL ID**: [TO BE FILLED]
 
   - type: textarea
     id: tasks
