@@ -18,9 +18,6 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.MY_PAT }} # Use the personal access token
       run: |
-        # Authenticate with the GitHub CLI using the provided token
-        gh auth login --with-token <<< "$GH_TOKEN"
-
         # Get the body of the newly created issue
         BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q ".body")
 
@@ -32,10 +29,10 @@ jobs:
               id
             }
           }
-        }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f number=${{ github.event.issue.number }} --jq '.repository.issue.id')
+        }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f number=${{ github.event.issue.number }} --jq '.repository.issue.id' --token $GH_TOKEN)
 
         # Append the GraphQL ID to the issue body
         UPDATED_BODY="$BODY\n\n**GraphQL ID**: $GRAPHQL_ID"
 
         # Update the issue with the new body
-        gh issue update ${{ github.event.issue.number }} --body "$UPDATED_BODY"
+        gh issue update ${{ github.event.issue.number }} --body "$UPDATED_BODY" --token $GH_TOKEN
