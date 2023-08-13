@@ -1,37 +1,29 @@
-# Name of the GitHub Action
 name: Update Issue with GraphQL ID
 
-# This action triggers when an issue is opened
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
   update_issue:
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
     steps:
-    # Checks out a copy of your repository on the ubuntu-latest machine
-    - name: Check out code
+    - name: Checkout code
       uses: actions/checkout@v2
-      
-    # The main script that updates the issue with its GraphQL ID
+
     - name: Update issue with GraphQL ID
       run: |
         # Get the body of the newly created issue
-        ISSUE_BODY="${{ github.event.issue.body }}"
+        ISSUE_BODY=$(gh issue view ${{ github.event.issue.number }} --json body -R ${{ github.repository }} | jq -r .body)
         
-        # Get the GraphQL ID of the newly created issue
-        GRAPHQL_ID="${{ github.event.issue.node_id }}"
-        
-        # Append the GraphQL ID to the end of the issue's body
-        UPDATED_BODY="$ISSUE_BODY\n\n**GraphQL ID**: $GRAPHQL_ID"
-        
-        # Write the updated body to a temporary file
-        echo "$UPDATED_BODY" > updated_body.txt
-        
-        # Use the 'gh' CLI tool to update the issue with the updated body
-        gh issue update ${{ github.event.issue.number }} --body-file updated_body.txt
-      # The GITHUB_TOKEN secret is used for authentication with the 'gh' CLI tool
+        # Check if the GraphQL ID placeholder exists in the issue body
+        if [[ $ISSUE_BODY == *"[TO BE FILLED]"* ]]; then
+          # Replace the placeholder with the actual GraphQL ID
+          UPDATED_BODY=$(echo "$ISSUE_BODY" | sed "s/\[TO BE FILLED\]/${{ github.event.issue.node_id }}/g")
+          
+          # Update the issue with the new body
+          echo "$UPDATED_BODY" > updated_body.txt
+          gh issue edit ${{ github.event.issue.number }} --body "$(cat updated_body.txt)" -R ${{ github.repository }}
+        fi
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
