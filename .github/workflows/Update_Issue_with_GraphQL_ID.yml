@@ -1,54 +1,32 @@
-name: Update Issue with GraphQL ID
+- name: Get the body of the newly created issue
+  run: |
+    # Get the JSON response of the newly created issue
+    issue_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }})
+    echo "Issue Response: $issue_response"  # Debugging line
 
-on:
-  issues:
-    types: [opened]
-
-jobs:
-  update_issue:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Install GitHub CLI
-      run: |
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-        sudo apt update
-        sudo apt install gh
-
-    - name: Authenticate with GitHub CLI
-      run: gh auth login --with-token <<< ${{ secrets.MY_PAT }}
-
-    - name: Get the body of the newly created issue
-      run: |
-        # Get the JSON response of the newly created issue
-        issue_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }})
-        echo "Issue Response: $issue_response"  # Debugging line
-
-        # Get the number of the newly created issue
-        issue_number=$(echo "$issue_response" | jq '.number')
-        echo "Issue Number: $issue_number"
+    # Get the number of the newly created issue
+    issue_number=$(echo "$issue_response" | jq '.number')
+    echo "Issue Number: $issue_number"
   
-        # Get the body of the newly created issue
-        issue_body=$(gh issue view "$issue_number" --repo $GITHUB_REPOSITORY --json body -q '.body')
-        echo "Issue Body: $issue_body"  # Debugging line
+    # Get the body of the newly created issue
+    issue_body=$(gh issue view "$issue_number" --repo $GITHUB_REPOSITORY --json body -q '.body')
+    echo "Issue Body: $issue_body"  # Debugging line
   
-        # Extract the GraphQL ID from the issue body
-        graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+')
-        echo "Extracted GraphQL ID: $graphql_id"  # Debugging line
+    # Extract the GraphQL ID from the issue body
+    graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+')
+    echo "Extracted GraphQL ID: $graphql_id"  # Debugging line
   
-        # If the GraphQL ID is not found in the issue body, update the issue with the GraphQL ID
-        if [ -z "$graphql_id" ] || [ "$graphql_id" == "[TO BE FILLED]" ]; then
-          # Get the GraphQL ID of the issue
-          graphql_id=$(echo "$issue_response" | jq -r '.node_id')
-          echo "GraphQL ID from Response: $graphql_id"  # Debugging line
+    # If the GraphQL ID is not found in the issue body, update the issue with the GraphQL ID
+    if [ -z "$graphql_id" ] || [ "$graphql_id" == "[TO BE FILLED]" ]; then
+      echo "Updating GraphQL ID..."  # Debugging line
+      # Get the GraphQL ID of the issue
+      graphql_id=$(echo "$issue_response" | jq -r '.node_id')
+      echo "GraphQL ID from Response: $graphql_id"  # Debugging line
   
-          # Update the issue body with the GraphQL ID
-          updated_issue_body=$(echo "$issue_body" | sed "s/GraphQL ID: \[TO BE FILLED\]/GraphQL ID: $graphql_id/")
-          echo "Updated Issue Body: $updated_issue_body"  # Debugging line
+      # Update the issue body with the GraphQL ID
+      updated_issue_body=$(echo "$issue_body" | sed "s/GraphQL ID: \[TO BE FILLED\]/GraphQL ID: $graphql_id/")
+      echo "Updated Issue Body: $updated_issue_body"  # Debugging line
   
-          # Update the issue with the new body
-          gh api repos/$GITHUB_REPOSITORY/issues/$issue_number --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATCH
-        fi
+      # Update the issue with the new body
+      gh api repos/$GITHUB_REPOSITORY/issues/$issue_number --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATCH
+    fi
