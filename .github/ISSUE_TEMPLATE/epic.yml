@@ -1,5 +1,5 @@
 name: Epic 💎
-description: Create a new epic (very big user story)
+description: Create a new epic (in the product backlog, typically a capability or feature)
 labels: ["Epic", "status/draft"]
 body:          
   - type: textarea
