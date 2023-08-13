@@ -21,15 +21,21 @@ jobs:
         # Get the body of the newly created issue
         BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q ".body")
 
-        # Fetch the GraphQL ID of the issue
-        GRAPHQL_ID=$(gh api graphql -f query='
-        query ($owner: String!, $repo: String!, $number: Int!) {
-          repository(owner: $owner, name: $repo) {
-            issue(number: $number) {
-              id
+        # Fetch the GraphQL ID of the issue using curl
+        GRAPHQL_ID=$(curl -s -H "Authorization: bearer $GH_TOKEN" -X POST -d '{
+          "query": "query ($owner: String!, $repo: String!, $number: Int!) {
+            repository(owner: $owner, name: $repo) {
+              issue(number: $number) {
+                id
+              }
             }
+          }",
+          "variables": {
+            "owner": "'${{ github.repository_owner }}'",
+            "repo": "'${{ github.event.repository.name }}'",
+            "number": '${{ github.event.issue.number }}'
           }
-        }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f number=${{ github.event.issue.number }} --jq '.repository.issue.id' --header "authorization: Bearer $GH_TOKEN")
+        }' https://api.github.com/graphql | jq -r '.data.repository.issue.id')
 
         # Append the GraphQL ID to the issue body
         UPDATED_BODY="$BODY\n\n**GraphQL ID**: $GRAPHQL_ID"
