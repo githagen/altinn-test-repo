@@ -29,7 +29,7 @@ jobs:
               id
             }
           }
-        }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f number=${{ github.event.issue.number }} --jq '.repository.issue.id' --token $GH_TOKEN)
+        }' -f owner=${{ github.repository_owner }} -f repo=${{ github.event.repository.name }} -f number=${{ github.event.issue.number }} --jq '.repository.issue.id' --header "authorization: Bearer $GH_TOKEN")
 
         # Append the GraphQL ID to the issue body
         UPDATED_BODY="$BODY\n\n**GraphQL ID**: $GRAPHQL_ID"
