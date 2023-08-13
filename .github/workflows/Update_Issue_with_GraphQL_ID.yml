@@ -48,7 +48,7 @@ jobs:
           echo "GraphQL ID from Response: $graphql_id"
   
           # Update the issue body with the GraphQL ID
-          updated_issue_body=$(echo "$issue_body" | sed "s/GraphQL ID: \[TO BE FILLED\]/GraphQL ID: $graphql_id/")
+          updated_issue_body=$(echo "$issue_body" | sed "s/\*\*GraphQL ID\*\*: \[TO BE FILLED\]/\*\*GraphQL ID\*\*: $graphql_id/")
           echo "Updated Issue Body: $updated_issue_body"
 
           # Properly escape the updated issue body and construct the JSON payload
@@ -59,8 +59,3 @@ jobs:
           update_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }} --input <(echo "$json_payload") -X PATCH)
           echo "Update Response: $update_response"
         fi
-
-
-
-
-
