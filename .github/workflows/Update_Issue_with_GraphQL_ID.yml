@@ -1,44 +1,49 @@
 name: Update Issue with GraphQL ID
 
-# This action is triggered when an issue is opened or edited
 on:
   issues:
-    types: [opened, edited]
+    types: [opened]
 
 jobs:
   update_issue:
     runs-on: ubuntu-latest
     steps:
-    # Check out the repository to access its content
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Update the issue with its GraphQL ID
-    - name: Update issue with GraphQL ID
-      env:
-        GH_TOKEN: ${{ secrets.MY_PAT }} # Use the personal access token
+    - name: Install GitHub CLI
       run: |
+        sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+        sudo apt-add-repository https://cli.github.com/packages
+        sudo apt update
+        sudo apt install gh
+
+    - name: Authenticate with GitHub CLI
+      run: gh auth login --with-token <<< ${{ secrets.MY_PAT }}
+
+    - name: Get the body of the newly created issue
+      run: |
+        # Get the JSON response of the newly created issue
+        issue_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }})
+
+        # Get the number of the newly created issue
+        issue_number=$(echo "$issue_response" | jq '.number')
+        echo "Issue Number: $issue_number"
+
         # Get the body of the newly created issue
-        issue_body=$(gh issue view $issue_number --repo $GITHUB_REPOSITORY --json body -q '.body')
+        issue_body=$(gh issue view "$issue_number" --repo $GITHUB_REPOSITORY --json body -q '.body')
 
-        # Fetch the GraphQL ID of the issue using curl
-        GRAPHQL_ID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -X POST -d '{
-          "query": "query ($owner: String!, $repo: String!, $number: Int!) {
-            repository(owner: $owner, name: $repo) {
-              issue(number: $number) {
-                id
-              }
-            }
-          }",
-          "variables": {
-            "owner": "'${{ github.repository_owner }}'",
-            "repo": "'${{ github.event.repository.name }}'",
-            "number": '${{ github.event.issue.number }}'
-          }
-        }' https://api.github.com/graphql | jq -r '.data.repository.issue.id')
+        # Extract the GraphQL ID from the issue body
+        graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+')
 
-        # Append the GraphQL ID to the issue body
-        UPDATED_BODY="$BODY\n\n**GraphQL ID**: $GRAPHQL_ID"
+        # If the GraphQL ID is not found in the issue body, update the issue with the GraphQL ID
+        if [ -z "$graphql_id" ] || [ "$graphql_id" == "[TO BE FILLED]" ]; then
+          # Get the GraphQL ID of the issue
+          graphql_id=$(echo "$issue_response" | jq -r '.node_id')
 
-        # Update the issue with the new body
-        gh issue update ${{ github.event.issue.number }} --body "$UPDATED_BODY" --token $GH_TOKEN
+          # Update the issue body with the GraphQL ID
+          updated_issue_body=$(echo "$issue_body" | sed "s/GraphQL ID: \[TO BE FILLED\]/GraphQL ID: $graphql_id/")
+
+          # Update the issue with the new body
+          gh api repos/$GITHUB_REPOSITORY/issues/$issue_number --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATCH
+        fi
