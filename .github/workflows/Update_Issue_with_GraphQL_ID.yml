@@ -37,13 +37,10 @@ jobs:
         echo "Issue Body: $issue_body"
   
         # Try to extract the GraphQL ID from the issue body
-        if ! graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+'); then
-          echo "Failed to extract GraphQL ID from the issue body."
-          exit 1
-        fi
+        graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+' || echo "[TO BE FILLED]")
         echo "Extracted GraphQL ID: $graphql_id"
   
-        # If the GraphQL ID is not found in the issue body, update the issue with the GraphQL ID
+        # If the GraphQL ID is not found in the issue body or is "[TO BE FILLED]", update the issue with the GraphQL ID
         if [ -z "$graphql_id" ] || [ "$graphql_id" == "[TO BE FILLED]" ]; then
           echo "Updating GraphQL ID..."
           # Get the GraphQL ID of the issue
