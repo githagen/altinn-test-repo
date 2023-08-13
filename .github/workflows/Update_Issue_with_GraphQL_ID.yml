@@ -14,26 +14,26 @@ jobs:
 
     - name: Install GitHub CLI
       run: |
+        set -e
         curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt update
         sudo apt install gh
 
     - name: Authenticate with GitHub CLI
-      run: gh auth login --with-token < <(echo ${{ secrets.MY_PAT }})
-
-    - name: Get the body of the newly created issue
       run: |
+        set -e
+        gh auth login --with-token < <(echo ${{ secrets.MY_PAT }})
+
+    - name: Get and update the issue body with GraphQL ID
+      run: |
+        set -e
         # Get the JSON response of the newly created issue
         issue_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }})
         echo "Issue Response: $issue_response"
 
-        # Get the number of the newly created issue
-        issue_number=$(echo "$issue_response" | jq '.number')
-        echo "Issue Number: $issue_number"
-  
         # Get the body of the newly created issue
-        issue_body=$(gh issue view "$issue_number" --repo $GITHUB_REPOSITORY --json body -q '.body')
+        issue_body=$(echo "$issue_response" | jq -r '.body')
         echo "Issue Body: $issue_body"
   
         # Extract the GraphQL ID from the issue body
@@ -52,4 +52,6 @@ jobs:
           echo "Updated Issue Body: $updated_issue_body"
   
           # Update the issue with the new body
-          gh api repos/$GITHUB_REPOSITORY/issues/$issue_number --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATC
+          gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }} --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATCH
+        fi
+        
