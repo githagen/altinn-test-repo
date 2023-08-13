@@ -1,5 +1,6 @@
 name: Update Issue with GraphQL ID
 
+
 # This action is triggered when an issue is opened or edited
 on:
   issues:
