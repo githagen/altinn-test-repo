@@ -1,4 +1,31 @@
-- name: Get and update the issue body with GraphQL ID
+name: Update Issue with GraphQL ID
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  update_issue:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install GitHub CLI
+      run: |
+        set -e
+        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+        sudo apt update
+        sudo apt install gh
+
+    - name: Authenticate with GitHub CLI
+      run: |
+        set -e
+        gh auth login --with-token < <(echo ${{ secrets.MY_PAT }})
+
+    - name: Get and update the issue body with GraphQL ID
       run: |
         set -e
         # Get the JSON response of the newly created issue
@@ -32,3 +59,8 @@
           update_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }} --input <(echo "$json_payload") -X PATCH)
           echo "Update Response: $update_response"
         fi
+
+
+
+
+
