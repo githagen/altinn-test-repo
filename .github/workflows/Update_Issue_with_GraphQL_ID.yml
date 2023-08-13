@@ -1,6 +1,5 @@
 name: Update Issue with GraphQL ID
 
-
 # This action is triggered when an issue is opened or edited
 on:
   issues:
@@ -20,7 +19,7 @@ jobs:
         GH_TOKEN: ${{ secrets.MY_PAT }} # Use the personal access token
       run: |
         # Get the body of the newly created issue
-        BODY=$(gh issue view ${{ github.event.issue.number }} --json body -q ".body")
+        issue_body=$(gh issue view $issue_number --repo $GITHUB_REPOSITORY --json body -q '.body')
 
         # Fetch the GraphQL ID of the issue using curl
         GRAPHQL_ID=$(curl -s -H "Authorization: Bearer $GH_TOKEN" -X POST -d '{
