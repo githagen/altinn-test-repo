@@ -36,8 +36,11 @@ jobs:
         issue_body=$(echo "$issue_response" | jq -r '.body')
         echo "Issue Body: $issue_body"
   
-        # Extract the GraphQL ID from the issue body
-        graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+')
+        # Try to extract the GraphQL ID from the issue body
+        if ! graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+'); then
+          echo "Failed to extract GraphQL ID from the issue body."
+          exit 1
+        fi
         echo "Extracted GraphQL ID: $graphql_id"
   
         # If the GraphQL ID is not found in the issue body, update the issue with the GraphQL ID
