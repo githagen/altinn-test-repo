@@ -25,25 +25,30 @@ jobs:
       run: |
         # Get the JSON response of the newly created issue
         issue_response=$(gh api repos/$GITHUB_REPOSITORY/issues/${{ github.event.issue.number }})
+        echo "Issue Response: $issue_response"  # Debugging line
 
         # Get the number of the newly created issue
         issue_number=$(echo "$issue_response" | jq '.number')
         echo "Issue Number: $issue_number"
-
+  
         # Get the body of the newly created issue
         issue_body=$(gh issue view "$issue_number" --repo $GITHUB_REPOSITORY --json body -q '.body')
-
+        echo "Issue Body: $issue_body"  # Debugging line
+  
         # Extract the GraphQL ID from the issue body
         graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+')
-
+        echo "Extracted GraphQL ID: $graphql_id"  # Debugging line
+  
         # If the GraphQL ID is not found in the issue body, update the issue with the GraphQL ID
         if [ -z "$graphql_id" ] || [ "$graphql_id" == "[TO BE FILLED]" ]; then
           # Get the GraphQL ID of the issue
           graphql_id=$(echo "$issue_response" | jq -r '.node_id')
-
+          echo "GraphQL ID from Response: $graphql_id"  # Debugging line
+  
           # Update the issue body with the GraphQL ID
           updated_issue_body=$(echo "$issue_body" | sed "s/GraphQL ID: \[TO BE FILLED\]/GraphQL ID: $graphql_id/")
-
+          echo "Updated Issue Body: $updated_issue_body"  # Debugging line
+  
           # Update the issue with the new body
           gh api repos/$GITHUB_REPOSITORY/issues/$issue_number --input <(echo "{\"body\":\"$updated_issue_body\"}") -X PATCH
         fi
