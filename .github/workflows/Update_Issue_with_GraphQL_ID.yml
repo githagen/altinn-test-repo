@@ -23,7 +23,7 @@ jobs:
     - name: Authenticate with GitHub CLI
       run: |
         set -e
-        gh auth login --with-token < <(echo ${{ secrets.MY_PAT }})
+        gh auth login --with-token < <(echo ${{ secrets.MY_PAT2 }})
 
     - name: Get and update the issue body with GraphQL ID
       run: |
