@@ -50,8 +50,7 @@ jobs:
           echo "GithubIssueID from Response: $github_issue_id"
   
           # Update the issue body with the GithubIssueID
-          updated_issue_body=$(echo "$issue_body" | sed "s|_GithubIssueID_: \[to be autofilled\]|_GithubIssueID_: $github_issue_id|")
-          updated_issue_body=$(echo "$issue_body" | sed "s/_GithubIssueID_: \[to be autofilled\]/_GithubIssueID_: $github_issue_id/")
+          updated_issue_body=$(echo "$issue_body" | sed "s/- _GithubIssueID_: \[to be autofilled\]/- _GithubIssueID_: $github_issue_id/")
           echo "Updated Issue Body: $updated_issue_body"
 
           # Properly escape the updated issue body and construct the JSON payload
