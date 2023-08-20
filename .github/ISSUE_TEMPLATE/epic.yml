@@ -28,8 +28,8 @@ body:
       label: Additional Information
       description: Links to relevant resources, documentation of other issues, UX sketches, technical architecture/requirements.
       value: |
-        - **Archi Object ID**: [TO BE FILLED]
-        - **GraphQL ID**: [TO BE FILLED]
+        - _ArchiConceptID_: [to be autofilled]
+        - _GithubIssueID_: [to be autofilled]
 
   - type: textarea
     id: tasks
