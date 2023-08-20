@@ -1,4 +1,4 @@
-name: Update Issue with GraphQL ID
+name: Update Issue with GithubIssueID
 
 on:
   issues:
@@ -25,7 +25,7 @@ jobs:
         set -e
         gh auth login --with-token < <(echo ${{ secrets.MY_PAT2 }})
 
-    - name: Get and update the issue body with GraphQL ID
+    - name: Get and update the issue body with GithubIssueID
       run: |
         set -e
         # Get the JSON response of the newly created issue
@@ -36,19 +36,19 @@ jobs:
         issue_body=$(echo "$issue_response" | jq -r '.body')
         echo "Issue Body: $issue_body"
   
-        # Try to extract the GraphQL ID from the issue body
-        graphql_id=$(echo "$issue_body" | grep -oP 'GraphQL ID: \K[^\s]+' || echo "[TO BE FILLED]")
-        echo "Extracted GraphQL ID: $graphql_id"
+        # Try to extract the GithubIssueID from the issue body
+        github_issue_id=$(echo "$issue_body" | grep -oP '_GithubIssueID_: \K[^\s]+' || echo "[TO BE FILLED]")
+        echo "Extracted GithubIssueID: $github_issue_id"
   
-        # If the GraphQL ID is not found in the issue body or is "[TO BE FILLED]", update the issue with the GraphQL ID
-        if [ -z "$graphql_id" ] || [ "$graphql_id" == "[TO BE FILLED]" ]; then
-          echo "Updating GraphQL ID..."
-          # Get the GraphQL ID of the issue
-          graphql_id=$(echo "$issue_response" | jq -r '.node_id')
-          echo "GraphQL ID from Response: $graphql_id"
+        # If the GithubIssueID is not found in the issue body or is "[TO BE FILLED]", update the issue with the GithubIssueID
+        if [ -z "$github_issue_id" ] || [ "$github_issue_id" == "[TO BE FILLED]" ]; then
+          echo "Updating GithubIssueID..."
+          # Get the GithubIssueID of the issue
+          github_issue_id=$(echo "$issue_response" | jq -r '.node_id')
+          echo "GithubIssueID from Response: $github_issue_id"
   
-          # Update the issue body with the GraphQL ID
-          updated_issue_body=$(echo "$issue_body" | sed "s/\*\*GraphQL ID\*\*: \[TO BE FILLED\]/\*\*GraphQL ID\*\*: $graphql_id/")
+          # Update the issue body with the GithubIssueID
+          updated_issue_body=$(echo "$issue_body" | sed "s/_GithubIssueID_: \[TO BE FILLED\]/_GithubIssueID_: $github_issue_id/")
           echo "Updated Issue Body: $updated_issue_body"
 
           # Properly escape the updated issue body and construct the JSON payload
