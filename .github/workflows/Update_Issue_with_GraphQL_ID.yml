@@ -37,18 +37,18 @@ jobs:
         echo "Issue Body: $issue_body"
   
         # Try to extract the GithubIssueID from the issue body
-        github_issue_id=$(echo "$issue_body" | grep -oP '_GithubIssueID_: \K[^\s]+' || echo "[TO BE FILLED]")
+        github_issue_id=$(echo "$issue_body" | grep -oP '_GithubIssueID_: \K[^\s]+' || echo "[to be autofilled]")
         echo "Extracted GithubIssueID: $github_issue_id"
   
-        # If the GithubIssueID is not found in the issue body or is "[TO BE FILLED]", update the issue with the GithubIssueID
-        if [ -z "$github_issue_id" ] || [ "$github_issue_id" == "[TO BE FILLED]" ]; then
+        # If the GithubIssueID is not found in the issue body or is "[to be autofilled]", update the issue with the GithubIssueID
+        if [ -z "$github_issue_id" ] || [ "$github_issue_id" == "[to be autofilled]" ]; then
           echo "Updating GithubIssueID..."
           # Get the GithubIssueID of the issue
           github_issue_id=$(echo "$issue_response" | jq -r '.node_id')
           echo "GithubIssueID from Response: $github_issue_id"
   
           # Update the issue body with the GithubIssueID
-          updated_issue_body=$(echo "$issue_body" | sed "s/_GithubIssueID_: \[TO BE FILLED\]/_GithubIssueID_: $github_issue_id/")
+          updated_issue_body=$(echo "$issue_body" | sed "s/_GithubIssueID_: \[to be autofilled\]/_GithubIssueID_: $github_issue_id/")
           echo "Updated Issue Body: $updated_issue_body"
 
           # Properly escape the updated issue body and construct the JSON payload
