@@ -19,11 +19,13 @@ jobs:
         echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
         sudo apt update
         sudo apt install gh
+ 
 
+        
     - name: Authenticate with GitHub CLI
       run: |
         set -e
-        gh auth login --with-token < <(echo ${{ secrets.MY_PAT2 }})
+        gh auth login --with-token < <(echo ${{ secrets.MY_PAT }})
 
     - name: Get and update the issue body with GithubIssueID
       run: |
