@@ -39,7 +39,7 @@ jobs:
         echo "Issue Body: $issue_body"
   
         # Try to extract the GithubIssueID from the issue body
-        github_issue_id=$(echo "$issue_body" | grep -oP '_GithubIssueID_: \K[^\s]+' || echo "[to be autofilled]")
+        github_issue_id=$(echo "$issue_body" | grep -oP '_GithubIssueID_: \K\[to be autofilled\]' || echo "[to be autofilled]")
         echo "Extracted GithubIssueID: $github_issue_id"
   
         # If the GithubIssueID is not found in the issue body or is "[to be autofilled]", update the issue with the GithubIssueID
