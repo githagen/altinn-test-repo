@@ -1,6 +1,6 @@
-name: Epic 💎
-description: Create a new epic (in the product backlog, typically a capability or feature)
-labels: ["kind/epic", "status/draft"]
+name: Feature 💎
+description: Create a new feature (in the product backlog, typically a capability or feature)
+labels: ["kind/feature", "status/draft"]
 body:          
   - type: textarea
     id: description
@@ -14,13 +14,13 @@ body:
     id: in-scope
     attributes:
       label: In scope
-      description: What's in scope for this epic?
+      description: What's in scope for this feature?
 
   - type: textarea
     id: out-of-scope
     attributes:
       label: Out of scope
-      description: What's out of scope for this epic?
+      description: What's out of scope for this feature?
 
   - type: textarea
     id: additional-information
